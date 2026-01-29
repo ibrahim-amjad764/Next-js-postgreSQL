@@ -1,182 +1,173 @@
-# Next.js Firebase Auth + TypeORM PostgreSQL
-
-A **full‑stack authentication and dashboard system** built with **Next.js (App Router)**, **Firebase Authentication**, **TypeORM**, and **PostgreSQL**.
-The project demonstrates clean auth flow, route protection, and syncing Firebase users with a SQL database.
+Below is a **complete, production-style `README.md`** you can directly paste into your GitHub repository.
+It is **practical, clean, and interview-ready**, matching your stack and real-world approach.
 
 ---
 
-## 🚀 Features
+# 🚀 Next.js Firebase Auth + Edge Middleware App
 
-* ✅ Firebase Email/Password Authentication
-* 🔐 Protected routes (Dashboard)
-* 🚫 Auth pages hidden after login (Login / Signup restriction)
-* 🗄 PostgreSQL integration using TypeORM
-* 🔄 Sync Firebase users to database
-* ⚡ React Query for data fetching
-* 🎨 Dark / Light mode toggle
-* 🧠 Clean client‑side auth handling
+A **modern full-stack authentication and user management system** built with **Next.js App Router**, **Firebase Authentication**, **Edge Middleware**, and **PostgreSQL (TypeORM)**.
+This project demonstrates **real-world auth patterns**, **secure session handling**, and **high-performance route protection** using the **Edge Runtime**.
 
 ---
 
-## 🧱 Tech Stack
+## ✨ Features
 
-| Layer         | Technology               |
-| ------------- | ------------------------ |
-| Frontend      | Next.js 16 (App Router)  |
-| Auth          | Firebase Authentication  |
-| Backend       | Next.js API Routes       |
-| ORM           | TypeORM                  |
-| Database      | PostgreSQL               |
-| Data Fetching | TanStack React Query     |
-| UI            | Tailwind CSS + shadcn/ui |
+* 🔐 **Firebase Authentication** (Signup / Login / Logout)
+* 🍪 **HttpOnly Cookie-based Sessions**
+* ⚡ **Next.js Edge Middleware** (CDN-level auth protection)
+* 🛡️ Protected routes (`/feed`)
+* 🚫 Auth pages blocked for logged-in users
+* 🧑‍💻 **PostgreSQL + TypeORM** user persistence
+* 🔄 **React Query** for efficient data fetching
+* 🌙 **Dark Mode Toggle**
+* 🔍 **Search Bar (centered, responsive)**
+* ➕ **Create Post Button**
+* 🎨 Tailwind CSS + shadcn/ui
+* 🧩 Clean, scalable architecture
 
 ---
 
-## 📂 Project Structure
+## 🧠 Core Concept (High Level)
+
+* **Firebase (Client)** handles user identity
+* **Firebase Admin (Server)** verifies tokens
+* **Backend** sets a secure HttpOnly cookie
+* **Edge Middleware** reads cookies before page loads
+* Unauthorized users are redirected instantly
+* No client-side auth hacks or localStorage
+
+---
+
+## 🏗️ Tech Stack
+
+### Frontend
+
+* Next.js (App Router)
+* React
+* Tailwind CSS
+* shadcn/ui
+* React Query
+
+### Backend
+
+* Next.js API Routes
+* Firebase Admin SDK
+* Axios
+
+### Database
+
+* PostgreSQL
+* TypeORM
+
+### Security & Runtime
+
+* Edge Middleware
+* Edge Runtime (CDN)
+* HttpOnly Cookies
+* Firebase ID Tokens
+
+---
+
+## 📁 Project Structure
 
 ```txt
 src/
-├── app/
-│   ├── auth/
-│   │   ├── login/
-│   │   └── sign-up/
-│   ├── dashboard/
-│   └── api/
-│       └── users/
-├── components/
-├── entities/
-├── repositories/
-├── services/
-├── lib/
-│   ├── firebase.ts
-│   └── datasource.ts
+├─ app/
+│  ├─ auth/            # Login / Signup pages
+│  ├─ feed/            # Protected feed page
+│  ├─ api/             # Backend API routes
+│  └─ middleware.ts    # Edge middleware
+│
+├─ components/         # UI components
+├─ entities/           # TypeORM entities
+├─ lib/                # Firebase, Axios, utils
+├─ services/           # Auth & API services
+└─ types/              # Shared DTOs
 ```
 
 ---
 
 ## 🔐 Authentication Flow
 
-1. User signs up / logs in via **Firebase Auth**
-2. Firebase returns authenticated user
-3. User is redirected to `/dashboard`
-4. Dashboard is protected via `onAuthStateChanged`
-5. Auth pages auto‑redirect if user is already logged in
+1. User logs in via **Firebase Auth (client)**
+2. Firebase returns an **ID Token**
+3. Token is sent to `/api/auth/login`
+4. Backend verifies token using **Firebase Admin**
+5. Backend sets **HttpOnly cookie**
+6. Middleware checks cookie on every request
+7. User can access `/feed`
 
 ---
 
-## 🔒 Route Protection (Minimal Pattern)
+## ⚡ Edge Middleware (Why It Matters)
 
-Used on **dashboard**, **login**, and **signup** pages:
+* Runs **before page rendering**
+* Executes at **CDN edge locations**
+* No server or database hit
+* Extremely fast redirects
+* Perfect for auth & routing decisions
 
-```ts
-useEffect(() => {
-  const unsub = onAuthStateChanged(auth, user => {
-    if (!user) router.replace('/auth/login')
-  })
-  return () => unsub()
-}, [])
-```
-
-And for auth pages:
-
-```ts
-if (user) router.replace('/dashboard')
-```
+> ❌ Middleware does **NOT** handle database queries
+> ✅ Only lightweight logic (cookies, headers, redirects)
 
 ---
 
-## 🗄 Database (PostgreSQL + TypeORM)
+## 🧪 How to Test Middleware
 
-### User Entity Example
+* Open `/feed` without login → redirected to `/auth/login`
+* Login successfully → cookie is set
+* Visit `/feed` → access granted
+* Try `/auth/login` while logged in → redirected to `/feed`
+
+---
+
+## 🗄️ Database (TypeORM)
 
 ```ts
-@Entity()
+@Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
-  id: number
-
-  @Column({ nullable: true })
-  firstName: string
-
-  @Column({ nullable: true })
-  lastName: string
+  id!: number;
 
   @Column({ unique: true })
-  email: string
+  email!: string;
+
+  @Column({ nullable: true })
+  firstName?: string;
+
+  @Column({ nullable: true })
+  lastName?: string;
 
   @Column({ default: true })
-  isActive: boolean
+  isActive!: boolean;
 
   @CreateDateColumn()
-  createdAt: Date
+  createdAt!: Date;
 }
 ```
 
 ---
 
-## 🌐 API Example
+## 🌙 UI Highlights
 
-```ts
-GET /api/users
-```
+* Sticky Facebook-style Navbar
+* Centered responsive search bar
+* Dark mode toggle (Tailwind)
+* User dropdown menu
+* Clean & accessible UI components
 
-* Initializes database
-* Fetches users using TypeORM repository
-* Returns JSON response
 
----
+## 📌 Why This Project Is Real-World Ready
 
-## ⚙️ Environment Variables
+* Uses **industry-standard auth flow**
+* Secure against XSS (HttpOnly cookies)
+* Works on refresh & hard reload
+* Scales with CDN
+* Clean separation of concerns
+* Interview-ready architecture
 
-Create `.env.local`:
 
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_NAME=next_js_database
 
-NEXT_PUBLIC_FIREBASE_API_KEY=xxxxx
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=xxxxx
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=xxxxx
-```
-
----
-
-## 🧪 Development
-
-```bash
-npm install
-npm run dev
-```
-
-App runs on:
-
-```
-http://localhost:3000
-```
-
----
-
-## 🧠 Key Learnings
-
-* Firebase handles **authentication**, not authorization
-* Route protection must happen on **client + server**
-* `onAuthStateChanged` is the source of truth
-* TypeORM should be **singleton‑initialized** in Next.js
-* React Query avoids unnecessary refetching
-
----
-
-## 📌 Future Improvements
-
-* Middleware‑based auth protection
-* Role‑based access (admin / user)
-* Server Actions for auth sync
-* Email verification & password reset
-
----
 
 ## 👤 Author
 
@@ -188,4 +179,5 @@ Web Developer – Next.js, Firebase, PostgreSQL
 ## 📄 License
 
 MIT License
-# Next-js-postgreSQL
+# Next-js-Social-App
+# Next-js-Social-App
